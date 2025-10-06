@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #14b8a6 #f1f5f9;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+  margin: 0;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #14b8a6, #0d9488);
+  border-radius: 10px;
+  border: 2px solid #f1f5f9;
+  min-height: 20px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #0d9488, #0f766e);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #0f766e, #0d9488);
+}
+
+/* Dark mode scrollbar */
+.dark .scrollbar-thin {
+  scrollbar-color: #2dd4bf #374151;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-track {
+  background: #374151;
+  border-radius: 10px;
+  margin: 0;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #2dd4bf, #14b8a6);
+  border-radius: 10px;
+  border: 2px solid #374151;
+  min-height: 20px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #14b8a6, #0d9488);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #0d9488, #14b8a6);
+}
+
+/* Custom hover effect for expandable cards in dark mode */
+.dark .expandable-card-hover:hover {
+  opacity: 0.5 !important;
+}
+
+/* Radius shrink animation for C-shaped ring */
+@keyframes radiusShrink {
+  0% {
+    r: 94px; /* Original radius for 200px size with 12px stroke */
+    stroke-dasharray: 443.3 147.8; /* 75% visible, 25% hidden for original radius */
+  }
+  100% {
+    r: 70.5px; /* 75% of original radius */
+    stroke-dasharray: 332.5 110.8; /* 75% visible, 25% hidden for shrunk radius */
+  }
+}
+
+.animate-radius-shrink {
+  animation: radiusShrink 2s ease-in-out infinite alternate;
+}
+
+/* Fill progress animation is now handled in JavaScript */
+

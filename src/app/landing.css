@@ -1,0 +1,74 @@
+/* Custom responsive typography for landing page */
+.hero-headline {
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 1.1;
+}
+
+.hero-subheadline {
+  font-size: clamp(1rem, 3vw, 1.75rem);
+  line-height: 1.4;
+}
+
+.hero-button {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  padding: clamp(0.75rem, 1.5vw, 0.875rem) clamp(1.5rem, 3vw, 1.75rem);
+}
+
+.hero-disclaimer {
+  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+}
+
+/* Ensure proper spacing on very small screens */
+@media (max-width: 320px) {
+  .hero-headline {
+    font-size: 1.75rem;
+  }
+  
+  .hero-subheadline {
+    font-size: 0.875rem;
+  }
+}
+
+/* Better spacing for mobile landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero-headline {
+    font-size: clamp(1.5rem, 6vw, 3rem);
+  }
+  
+  .hero-subheadline {
+    font-size: clamp(0.875rem, 3vw, 1.25rem);
+  }
+}
+
+/* Cap font sizes on very large screens */
+@media (min-width: 1920px) {
+  .hero-headline {
+    font-size: 3.5rem;
+  }
+  
+  .hero-subheadline {
+    font-size: 1.5rem;
+  }
+  
+  .hero-button {
+    font-size: 1rem;
+    padding: 0.875rem 1.75rem;
+  }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 2560px) {
+  .hero-headline {
+    font-size: 4rem;
+  }
+  
+  .hero-subheadline {
+    font-size: 1.75rem;
+  }
+}
+
+/* Handwritten font for personal messages */
+.font-handwriting {
+  font-family: var(--font-dancing-script), 'Brush Script MT', cursive;
+  font-weight: 400;
+}
