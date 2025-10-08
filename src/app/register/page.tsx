@@ -240,10 +240,10 @@ export default function RegisterPage() {
       </div>
 
       {/* Desktop Layout - Equal Height Sides */}
-      <div className="hidden md:flex flex-1 min-h-screen">
-        {/* Left Side - Logo and Text */}
+      <div className="md:flex flex-1 min-h-screen">
+        {/* Left Side - Logo and Text - Hidden on mobile, visible on desktop */}
         <div 
-          className="flex-1 flex flex-col items-center px-8 py-16"
+          className="hidden md:flex flex-1 flex-col items-center px-8 py-16"
           style={{ backgroundColor: 'rgba(0, 37, 39)' }}
         >
         <div className="max-w-md text-center">
@@ -316,7 +316,7 @@ export default function RegisterPage() {
         </div>
         </div>
 
-        {/* Right Side - Register Form */}
+        {/* Right Side - Register Form - Visible on both mobile and desktop */}
         <div 
           className="flex-1 flex flex-col items-center justify-center px-8 py-12"
           style={{ backgroundColor: 'rgba(234, 128, 64)' }}
