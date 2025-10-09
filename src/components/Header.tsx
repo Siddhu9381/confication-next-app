@@ -4,20 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
-  const router = useRouter();
+  const { signOut } = useAuth();
 
-  const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('sessionReportData');
-    localStorage.removeItem('finalTranscript');
-    // Redirect to login page
-    router.push('/login');
+  const handleLogout = async () => {
+    await signOut(); // This handles everything: Firebase signout + localStorage cleanup + redirect
   };
 
   const toggleMenu = () => {
@@ -28,7 +23,7 @@ export default function Header() {
     <header className={`sticky top-0 z-50 w-full py-3 shadow-lg transition-colors duration-300 ${
       isDarkMode ? 'border-b border-gray-700' : 'bg-white border-b border-gray-200'
     }`} style={isDarkMode ? { backgroundColor: 'rgba(0, 37, 39)' } : {}}>
-      <div className="w-full flex items-center justify-between">
+      <div className="w-full flex items-center justify-between relative">
         {/* Left side - Logo and App Name */}
         <Link href="/" className="flex items-center space-x-2 pl-4">
           {/* Logo */}
@@ -146,17 +141,16 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown - Floating */}
       {isMenuOpen && (
-        <div className={`lg:hidden mt-4 pb-4 border-t ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-200'
-        }`}>
-          <nav className="flex flex-col space-y-4 pt-4">
+        <div className="lg:hidden absolute right-4 top-full mt-2 w-48 rounded-lg shadow-lg overflow-hidden z-50"
+          style={isDarkMode ? { backgroundColor: 'rgba(0, 37, 39)' } : { backgroundColor: 'white' }}>
+          <nav className="py-2">
             <button 
-              className={`font-medium py-2 text-left flex items-center space-x-2 transition-colors duration-200 ${
+              className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors duration-200 ${
                 isDarkMode 
-                  ? 'text-white hover:text-gray-300' 
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'text-white hover:bg-gray-800' 
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
               onClick={() => {
                 toggleTheme();
@@ -194,7 +188,7 @@ export default function Header() {
                   />
                 </svg>
               )}
-              <span>Theme</span>
+              <span className="font-medium">Theme</span>
             </button>
             
             <button 
@@ -202,13 +196,26 @@ export default function Header() {
                 handleLogout();
                 setIsMenuOpen(false);
               }}
-              className={`font-medium py-2 transition-colors duration-200 ${
+              className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors duration-200 font-medium ${
                 isDarkMode 
-                  ? 'text-white hover:text-gray-300' 
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'text-white hover:bg-gray-800' 
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              Logout
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
+                />
+              </svg>
+              <span>Logout</span>
             </button>
           </nav>
         </div>

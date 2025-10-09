@@ -305,7 +305,7 @@ export default function SessionPage() {
     }
 
     // Use existing session ID (no need to create another session)
-    setRecordingStatus(`Session: ${sessionIdRef.current} — setting up transcriber...`);
+    setRecordingStatus('Setting up transcriber...');
 
     // Initialize StreamingTranscriber
     const transcriber = new StreamingTranscriber({
@@ -320,11 +320,11 @@ export default function SessionPage() {
     // Set up transcriber event handlers
     transcriber.on('open', async ({ id }) => {
         console.log(`✅ Session opened: ${id}`);
-        setRecordingStatus(`Session: ${sessionIdRef.current} — connected (${id})`);
+        setRecordingStatus('Connected transcriber');
         
         // Now set up audio processing after connection is established
         try {
-          setRecordingStatus(`Session: ${sessionIdRef.current} — setting up audio...`);
+          setRecordingStatus('Setting up audio...');
           console.log("🎤 Setting up audio processing after connection...");
           
           // Create AudioContext with 16kHz sample rate
@@ -422,7 +422,7 @@ export default function SessionPage() {
           await new Promise(resolve => setTimeout(resolve, 500));
           console.log("✅ Connection stability delay completed");
           
-          setRecordingStatus(`Session: ${sessionIdRef.current} — recording...`);
+          setRecordingStatus('Recording...');
         } catch (error) {
           console.error("❌ Error setting up audio processing:", error);
           setRecordingStatus(`Audio setup failed: ${error}`);
@@ -499,7 +499,7 @@ export default function SessionPage() {
     await transcriber.connect();
     console.log("✅ Connected to Assembly AI");
     
-    setRecordingStatus(`Session: ${sessionIdRef.current} — ready to record`);
+    setRecordingStatus('Ready to record');
   };
 
   const startRecording = async () => {
@@ -532,7 +532,7 @@ export default function SessionPage() {
         stopRecording();
       }, fillDuration); // 2 minutes
 
-      setRecordingStatus(`Session: ${sessionIdRef.current} — recording...`);
+      setRecordingStatus('Recording...');
 
     } catch (error) {
       console.error('Error starting recording:', error);
@@ -732,6 +732,13 @@ export default function SessionPage() {
                   <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
                     isDarkMode ? 'bg-white' : 'bg-gray-800'
                   }`}></div>
+                  <p className="text-sm">Please speak in <strong>English</strong> for accurate analysis</p>
+                </div>
+                
+                <div className="flex items-start space-x-3">
+                  <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                    isDarkMode ? 'bg-white' : 'bg-gray-800'
+                  }`}></div>
                   <p className="text-sm">Find a <strong>quiet environment</strong> for better speech analysis</p>
                 </div>
               </div>
@@ -749,6 +756,7 @@ export default function SessionPage() {
                     onClick={() => {
                       setShowStartModal(false);
                       setIsTokenFetched(false);
+                      setRecordingStatus('Idle');
                     }}
                     className={`px-6 py-3 rounded-lg font-semibold transition-colors duration-200 ${
                       isDarkMode 

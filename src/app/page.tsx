@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import './landing.css';
 import { Dancing_Script } from 'next/font/google';
 
@@ -10,6 +10,27 @@ const dancingScript = Dancing_Script({
 });
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleTryItFree = () => {
+    // Check if user is already authenticated
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.idToken) {
+          // User is authenticated, go directly to session page
+          router.push('/session');
+          return;
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+    // User is not authenticated, go to login page
+    router.push('/login');
+  };
+
   return (
     <div className={`min-h-screen flex items-center justify-center ${dancingScript.variable} bg-[rgba(0,37,39,0.8)]`}>
       <div className="w-full">
@@ -27,12 +48,12 @@ export default function Home() {
 
           {/* Call to Action Button */}
           <div className="flex justify-center items-center mb-8 px-4">
-            <Link 
-              href="/login"
+            <button 
+              onClick={handleTryItFree}
               className="hero-button w-full sm:w-auto rounded-xl font-bold transition-all duration-200 transform hover:scale-105 bg-[rgba(234,128,64)] hover:bg-[rgba(234,128,64,0.9)] text-white shadow-lg hover:shadow-xl"
             >
               Try It Free
-            </Link>
+            </button>
           </div>
 
           {/* Small disclaimer text */}

@@ -17,6 +17,7 @@ interface TabProps {
       snippet: string;
       fix: string;
     };
+    infoTooltip?: string;
   }>;
   tabId: string;
   expandedCards: Set<number>;
@@ -45,6 +46,7 @@ export default function Tab({ isDarkMode, title, cards, tabId, expandedCards, on
           feedback={card.feedback}
           drill={card.drill}
           evidence={card.evidence}
+          infoTooltip={card.infoTooltip}
         />
       ))}
     </div>

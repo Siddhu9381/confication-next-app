@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { signInWithEmailAndPassword, signOut, Auth } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, signOut, Auth } from 'firebase/auth';
 // @ts-ignore - auth can be undefined during SSR
-import { auth } from '../../../lib/firebase';
+import { auth, googleProvider } from '../../../lib/firebase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -118,14 +118,20 @@ export default function LoginPage() {
         router.push('/session');
         
       } catch (error: any) {
-        console.error('Login error:', error);
+        // Log error details only in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Login error:', error);
+        }
         
         // Handle specific Firebase auth errors
         let errorMessage = 'Login failed. Please try again';
         
         switch (error.code) {
+          case 'auth/invalid-credential':
+            errorMessage = 'Invalid email or password. If you don\'t have an account, please register below.';
+            break;
           case 'auth/user-not-found':
-            errorMessage = 'No account found with this email address';
+            errorMessage = 'No account found with this email address. Please register below.';
             break;
           case 'auth/wrong-password':
             errorMessage = 'Incorrect password';
@@ -157,14 +163,78 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Google authentication will be implemented later
-      console.log('Google login clicked - Coming soon!');
-      
-      // Show a temporary message
-      alert('Google authentication will be available soon! Please use email/password login for now.');
-      
+      // @ts-ignore
+      const firebaseAuth = auth as Auth | null;
+      if (!firebaseAuth || !googleProvider) {
+        throw new Error('Authentication service not available. Please refresh the page.');
+      }
+
+      // Sign in with Google popup
+      const result = await signInWithPopup(firebaseAuth, googleProvider);
+      const user = result.user;
+
+      // Get ID token
+      const idToken = await user.getIdToken();
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        idToken: idToken,
+        emailVerified: true // Google accounts are always verified
+      }));
+
+      // Optional: Send user data to backend (registration/login)
+      const API_BASE = process.env.NEXT_PUBLIC_CONFICATION_URL || 'http://localhost:8000';
+      try {
+        await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: user.email,
+            firstName: user.displayName?.split(' ')[0] || '',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+            uid: user.uid
+          })
+        });
+      } catch (error) {
+        // Silently fail if backend registration fails
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Failed to sync user with backend:', error);
+        }
+      }
+
+      console.log('Google login successful:', user.email);
+      router.push('/session');
+
     } catch (error: any) {
-      console.error('Google login error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Google login error:', error);
+      }
+      
+      let errorMessage = 'Google authentication failed.';
+      
+      switch (error.code) {
+        case 'auth/popup-closed-by-user':
+          errorMessage = 'Sign-in popup was closed. Please try again.';
+          break;
+        case 'auth/popup-blocked':
+          errorMessage = 'Sign-in popup was blocked. Please allow popups and try again.';
+          break;
+        case 'auth/cancelled-popup-request':
+          errorMessage = 'Sign-in was cancelled.';
+          break;
+        case 'auth/account-exists-with-different-credential':
+          errorMessage = 'An account already exists with this email using a different sign-in method.';
+          break;
+        default:
+          errorMessage = error.message || 'Google authentication failed. Please try again.';
+      }
+      
+      setErrors(prev => ({ ...prev, email: errorMessage }));
     } finally {
       setIsLoading(false);
     }
@@ -356,19 +426,19 @@ export default function LoginPage() {
             {isLoading ? 'Signing in...' : 'Continue with Google'}
           </button>
 
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-white">
-              New user?{' '}
-              <button
-                onClick={() => {
-                  router.push('/register');
-                }}
-                className="text-teal-600 hover:text-teal-700 font-medium transition-colors duration-200 focus:outline-none focus:underline"
-              >
-                Register now
-              </button>
+          {/* Register Link - More Prominent */}
+          <div className="mt-6 text-center p-4 rounded-lg bg-white/10 border border-white/20">
+            <p className="text-base text-white font-medium mb-2">
+              Don't have an account?
             </p>
+            <button
+              onClick={() => {
+                router.push('/register');
+              }}
+              className="w-full bg-white hover:bg-gray-100 text-teal-600 font-semibold py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2"
+            >
+              Create Account
+            </button>
           </div>
 
           {/* Email Verification Help */}

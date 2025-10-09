@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, Auth } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signInWithPopup, Auth } from 'firebase/auth';
 // @ts-ignore
-import { auth } from '../../../lib/firebase';
+import { auth, googleProvider } from '../../../lib/firebase';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -179,38 +179,117 @@ export default function RegisterPage() {
       setShowVerificationModal(true);
 
     } catch (error: any) {
-      console.error('Registration error:', error);
+      // Log error details only in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Registration error:', error);
+      }
       
       // Handle specific Firebase errors
-      let errorMessage = 'Registration failed. Please try again.';
-      
       switch (error.code) {
         case 'auth/email-already-in-use':
-          setErrors(prev => ({ ...prev, email: 'This email is already registered' }));
+          setErrors(prev => ({ ...prev, email: 'This email is already registered. Please login or use a different email.' }));
           break;
         case 'auth/weak-password':
-          setErrors(prev => ({ ...prev, password: 'Password is too weak' }));
+          setErrors(prev => ({ ...prev, password: 'Password is too weak. Please use a stronger password.' }));
           break;
         case 'auth/invalid-email':
-          setErrors(prev => ({ ...prev, email: 'Invalid email address' }));
+          setErrors(prev => ({ ...prev, email: 'Invalid email address. Please enter a valid email.' }));
           break;
         case 'auth/operation-not-allowed':
-          errorMessage = 'Email/password accounts are not enabled';
+          setErrors(prev => ({ ...prev, email: 'Email/password registration is not enabled. Please contact support.' }));
+          break;
+        case 'auth/network-request-failed':
+          setErrors(prev => ({ ...prev, email: 'Network error. Please check your connection and try again.' }));
           break;
         default:
-          errorMessage = error.message || 'Registration failed. Please try again.';
+          setErrors(prev => ({ ...prev, email: error.message || 'Registration failed. Please try again.' }));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    setIsLoading(true);
+    try {
+      // @ts-ignore
+      const firebaseAuth = auth as Auth | null;
+      // @ts-ignore
+      if (!firebaseAuth || !googleProvider) {
+        throw new Error('Authentication service not available. Please refresh the page.');
+      }
+
+      // Sign in with Google popup (registration and login are the same for Google)
+      const result = await signInWithPopup(firebaseAuth, googleProvider);
+      const user = result.user;
+
+      // Get ID token
+      const idToken = await user.getIdToken();
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        idToken: idToken,
+        emailVerified: true // Google accounts are always verified
+      }));
+
+      // Send user data to backend
+      const API_BASE = process.env.NEXT_PUBLIC_CONFICATION_URL || 'http://localhost:8000';
+      try {
+        await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: user.email,
+            firstName: user.displayName?.split(' ')[0] || '',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+            uid: user.uid
+          })
+        });
+      } catch (error) {
+        // Silently fail if backend registration fails
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Failed to register user in backend:', error);
+        }
+      }
+
+      console.log('Google registration successful:', user.email);
+      
+      // No email verification modal needed for Google - go straight to session
+      router.push('/session');
+
+    } catch (error: any) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Google registration error:', error);
+      }
+      
+      let errorMessage = 'Google authentication failed.';
+      
+      switch (error.code) {
+        case 'auth/popup-closed-by-user':
+          errorMessage = 'Sign-in popup was closed. Please try again.';
+          break;
+        case 'auth/popup-blocked':
+          errorMessage = 'Sign-in popup was blocked. Please allow popups and try again.';
+          break;
+        case 'auth/cancelled-popup-request':
+          errorMessage = 'Sign-in was cancelled.';
+          break;
+        case 'auth/account-exists-with-different-credential':
+          errorMessage = 'An account already exists with this email. Please login instead.';
+          break;
+        default:
+          errorMessage = error.message || 'Google authentication failed. Please try again.';
       }
       
       setErrors(prev => ({ ...prev, email: errorMessage }));
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleGoogleRegister = () => {
-    // Handle Google registration logic here
-    console.log('Google registration clicked');
-    // You can add your Google OAuth logic here
   };
 
   return (
@@ -276,8 +355,27 @@ export default function RegisterPage() {
             </p>
           </div>
 
+          {/* Free Session Credit */}
+          <div className="mt-8 p-4 rounded-lg" style={{ backgroundColor: 'rgba(234, 128, 64, 0.15)' }}>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-[rgba(234,128,64)] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white mb-1">
+                  1 Free Session Credit
+                </h3>
+                <p className="text-xs text-gray-300">
+                  Get 1 recording session credit when you sign up. Each session is up to 2 minutes of speech analysis.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Email Verification Notice */}
-          <div className="mt-8 p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+          <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
                 <svg className="w-5 h-5 text-white mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

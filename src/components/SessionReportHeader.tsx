@@ -3,20 +3,17 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function SessionReportHeader() {
   const { isDarkMode, toggleTheme } = useTheme();
+  const { signOut } = useAuth();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('sessionReportData');
-    localStorage.removeItem('finalTranscript');
-    // Redirect to login page
-    router.push('/login');
+  const handleLogout = async () => {
+    await signOut(); // This handles everything: Firebase signout + localStorage cleanup + redirect
   };
 
   const handleFeedback = () => {
@@ -33,7 +30,7 @@ export default function SessionReportHeader() {
         ? 'bg-[rgba(0, 37, 39)] border-gray-700' 
         : 'bg-white border-gray-200'
     }`}>
-      <div className="w-full flex items-center justify-between px-4">
+      <div className="w-full flex items-center justify-between px-4 relative">
         {/* Left side - Logo and App Name */}
         <div className="flex items-center space-x-2">
           <div
@@ -137,46 +134,67 @@ export default function SessionReportHeader() {
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown - Floating */}
       {isMenuOpen && (
-        <div className={`lg:hidden mt-4 pb-4 border-t ${
-          isDarkMode ? 'border-gray-700' : 'border-gray-200'
+        <div className={`lg:hidden absolute right-4 top-full mt-2 w-48 rounded-lg shadow-lg overflow-hidden z-50 ${
+          isDarkMode ? 'bg-[rgba(0, 37, 39)] border border-gray-700' : 'bg-white border border-gray-200'
         }`}>
-          <nav className="flex flex-col space-y-4 pt-4 px-4">
+          <nav className="py-2">
             <button
               onClick={() => {
                 handleFeedback();
                 setIsMenuOpen(false);
               }}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 text-left ${
+              className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors duration-200 font-medium ${
                 isDarkMode
-                  ? 'bg-[rgba(234,128,64)] hover:bg-[rgba(234,128,64,0.9)] text-white'
-                  : 'bg-[rgba(0, 37, 39)] hover:bg-[rgba(0, 37, 39,0.9)] text-white'
+                  ? 'text-white hover:bg-gray-800'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              Feedback
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+              </svg>
+              <span>Feedback</span>
             </button>
 
             <button
-              onClick={toggleTheme}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 text-left ${
+              onClick={() => {
+                toggleTheme();
+                setIsMenuOpen(false);
+              }}
+              className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors duration-200 font-medium ${
                 isDarkMode
-                  ? 'text-gray-300 hover:text-white hover:bg-gray-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'text-white hover:bg-gray-800'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              {isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              {isDarkMode ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+              <span>Theme</span>
             </button>
 
             <button
-              onClick={handleLogout}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 text-left ${
+              onClick={() => {
+                handleLogout();
+                setIsMenuOpen(false);
+              }}
+              className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors duration-200 font-medium ${
                 isDarkMode
-                  ? 'text-gray-300 hover:text-white hover:bg-gray-700'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'text-white hover:bg-gray-800'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              Logout
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>Logout</span>
             </button>
           </nav>
         </div>

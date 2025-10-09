@@ -140,7 +140,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           content: reportData.report.delivery.fillers.feedback,
           label: reportData.report.delivery.fillers.label,
           feedback: reportData.report.delivery.fillers.feedback,
-          drill: reportData.report.delivery.fillers.drill
+          drill: reportData.report.delivery.fillers.drill,
+          infoTooltip: 'Tracks how often you use filler words like "um," "uh," or "like," which can affect confidence and flow.'
         },
         {
           title: 'Pace',
@@ -149,7 +150,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           content: reportData.report.delivery.pace.feedback,
           label: reportData.report.delivery.pace.label,
           feedback: reportData.report.delivery.pace.feedback,
-          drill: reportData.report.delivery.pace.drill
+          drill: reportData.report.delivery.pace.drill,
+          infoTooltip: 'Measures how fast you speak overall to ensure your delivery feels natural, steady, and easy to follow.'
         },
         {
           title: 'Pauses',
@@ -158,7 +160,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           content: reportData.report.delivery.pauses.feedback,
           label: reportData.report.delivery.pauses.label,
           feedback: reportData.report.delivery.pauses.feedback,
-          drill: reportData.report.delivery.pauses.drill
+          drill: reportData.report.delivery.pauses.drill,
+          infoTooltip: 'Checks whether your pauses are well-timed and natural, or if long or misplaced ones break the flow and reduce listener engagement.'
         }
       ]
     },
@@ -172,7 +175,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           content: reportData.report.language.fluency.feedback,
           label: reportData.report.language.fluency.label,
           feedback: reportData.report.language.fluency.feedback,
-          drill: reportData.report.language.fluency.drill
+          drill: reportData.report.language.fluency.drill,
+          infoTooltip: 'Measures how effortlessly you deliver your speech, focusing on smooth word flow and minimal hesitation.'
         },
         {
           title: 'Sentences',
@@ -181,7 +185,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           content: reportData.report.language.sentences.feedback,
           label: reportData.report.language.sentences.label,
           feedback: reportData.report.language.sentences.feedback,
-          drill: reportData.report.language.sentences.drill
+          drill: reportData.report.language.sentences.drill,
+          infoTooltip: 'Assesses your sentence length variation to see if you balance short and long sentences for a more engaging rhythm.'
         },
         {
           title: 'Grammar',
@@ -194,7 +199,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           evidence: reportData.report.language.grammar.evidence.snippet && reportData.report.language.grammar.evidence.snippet.trim() !== '' ? {
             snippet: reportData.report.language.grammar.evidence.snippet,
             fix: reportData.report.language.grammar.evidence.fix
-          } : undefined
+          } : undefined,
+          infoTooltip: 'Evaluates the correctness of your language, checking for errors in tense, agreement, and sentence structure.'
         }
       ]
     },
@@ -212,7 +218,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           evidence: {
             snippet: reportData.report.content.structure.evidence.problem,
             fix: reportData.report.content.structure.evidence.fix
-          }
+          },
+          infoTooltip: 'Evaluates how well your speech is organized, from a clear introduction to a focused body and a strong closing wrap-up.'
         },
         {
           title: 'Clarity',
@@ -225,7 +232,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           evidence: {
             snippet: reportData.report.content.clarity.evidence.problem,
             fix: reportData.report.content.clarity.evidence.fix
-          }
+          },
+          infoTooltip: 'Measures how easily your ideas can be understood and whether your words and terms are clearly defined.'
         },
         {
           title: 'Coherence',
@@ -238,7 +246,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           evidence: {
             snippet: reportData.report.content.coherence.evidence.problem,
             fix: reportData.report.content.coherence.evidence.fix
-          }
+          },
+          infoTooltip: 'Checks how smoothly your sentences connect and whether your thoughts flow logically from one to the next.'
         },
         {
           title: 'Persuasion',
@@ -251,7 +260,8 @@ export default function TabSection({ isDarkMode, reportData }: TabSectionProps) 
           evidence: {
             snippet: reportData.report.content.persuasion.evidence.problem,
             fix: reportData.report.content.persuasion.evidence.fix
-          }
+          },
+          infoTooltip: 'Assesses how effectively your ending leaves an impact — through a clear benefit, next step, or memorable closing message.'
         }
       ]
     }

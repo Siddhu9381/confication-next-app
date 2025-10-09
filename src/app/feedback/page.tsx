@@ -122,15 +122,50 @@ export default function FeedbackPage() {
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to submit feedback: ${response.status} ${response.statusText}`);
+          // Try to get error details from response
+          let errorDetails = '';
+          try {
+            const errorData = await response.json();
+            errorDetails = errorData.detail || errorData.message || '';
+          } catch (e) {
+            // Response might not be JSON
+          }
+          
+          throw new Error(`Failed to submit feedback: ${response.status} ${response.statusText}${errorDetails ? ` - ${errorDetails}` : ''}`);
         }
         
         // Show success message and redirect
         alert('Thank you for your feedback! We appreciate your input.');
         router.push('/');
-      } catch (error) {
-        console.error('Error submitting feedback:', error);
-        alert('There was an error submitting your feedback. Please try again.');
+      } catch (error: any) {
+        // Log error details in development only
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error submitting feedback:', error);
+        }
+        
+        // Show detailed error message to user
+        let errorMessage = 'There was an error submitting your feedback.';
+        
+        if (error.message) {
+          if (error.message.includes('401')) {
+            errorMessage = 'Authentication error. Please login again.';
+            // Redirect to login after showing error
+            setTimeout(() => router.push('/login'), 2000);
+          } else if (error.message.includes('403')) {
+            errorMessage = 'You do not have permission to submit feedback.';
+          } else if (error.message.includes('404')) {
+            errorMessage = 'Feedback service not found. Please contact support.';
+          } else if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503')) {
+            errorMessage = 'Server error. Please try again later.';
+          } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+            errorMessage = 'Network error. Please check your connection and try again.';
+          } else {
+            // Show the actual error message from the API
+            errorMessage = error.message;
+          }
+        }
+        
+        alert(errorMessage);
       } finally {
         setIsSubmitting(false);
       }

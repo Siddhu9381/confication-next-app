@@ -92,6 +92,8 @@ interface ExpandableCardProps {
     snippet: string;
     fix: string;
   };
+  // New prop for info tooltip
+  infoTooltip?: string;
 }
 
 export default function ExpandableCard({ 
@@ -105,8 +107,10 @@ export default function ExpandableCard({
   label,
   feedback,
   drill,
-  evidence
+  evidence,
+  infoTooltip
 }: ExpandableCardProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const percentage = (score / maxScore) * 100;
   
@@ -148,12 +152,51 @@ export default function ExpandableCard({
       >
         {/* Left Side - Title and Score */}
         <div className="flex items-center space-x-4 flex-1">
-          {/* Sub-section Title */}
-              <h6 className={`text-md font-small ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-            {title}
-          </h6>
+          {/* Sub-section Title with Info Icon */}
+          <div className="flex items-center space-x-2">
+            <h6 className={`text-md font-small ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              {title}
+            </h6>
+            
+            {/* Info Icon with Tooltip */}
+            {infoTooltip && (
+              <div className="relative">
+                <button
+                  type="button"
+                  className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors duration-200 ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  }`}
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowTooltip(!showTooltip);
+                  }}
+                >
+                  <span className="text-xs font-bold">i</span>
+                </button>
+                
+                {/* Tooltip */}
+                {showTooltip && (
+                  <div className={`absolute left-0 top-full mt-2 w-64 p-3 rounded-lg shadow-lg z-50 text-sm ${
+                    isDarkMode 
+                      ? 'bg-gray-800 text-gray-200 border border-gray-700' 
+                      : 'bg-white text-gray-700 border border-gray-200'
+                  }`}>
+                    {infoTooltip}
+                    {/* Arrow pointer */}
+                    <div className={`absolute -top-2 left-4 w-3 h-3 rotate-45 ${
+                      isDarkMode ? 'bg-gray-800 border-l border-t border-gray-700' : 'bg-white border-l border-t border-gray-200'
+                    }`}></div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Score Display - Status Bar (when not expanded OR on mobile when expanded) */}
           {(!isExpanded || isExpanded) && (
