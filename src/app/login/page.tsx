@@ -165,6 +165,7 @@ export default function LoginPage() {
     try {
       // @ts-ignore
       const firebaseAuth = auth as Auth | null;
+      // @ts-ignore
       if (!firebaseAuth || !googleProvider) {
         throw new Error('Authentication service not available. Please refresh the page.');
       }
